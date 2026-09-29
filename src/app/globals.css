@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-canvas: #FAF8F5;
+    --bg-surface: #F3EFEA;
+    --text-primary: #18181B;
+    --text-secondary: #52525B;
+    --accent-indigo: #1E3A8A;
+    --accent-amber: #D97706;
+    --accent-emerald: #059669;
+    --border-stone: #E5E0D8;
+  }
+
+  body {
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    background-color: #FAF8F5;
+    color: #18181B;
+  }
+
+  h1, h2, h3, .font-serif-scholar {
+    font-family: var(--font-serif), Georgia, serif;
+  }
+
+  code, pre, .font-mono-tech {
+    font-family: var(--font-mono), monospace;
+  }
+}
+
+/* Custom archival scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3EFEA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D5CFC4;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8B0A2;
+}
+
+@keyframes pulseFlash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.55);
+    background-color: #FEF3C7;
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(217, 119, 6, 0);
+    background-color: #FFFBEB;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+  }
+}
+
+.citation-flash {
+  animation: pulseFlash 1.6s ease-out;
+}
