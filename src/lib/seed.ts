@@ -54,9 +54,28 @@ async function runSeed(): Promise<void> {
         major: "Computational Neurobiology & CS",
         university: "Columbia Archival Research Institute",
         avatarColor: "#1E3A8A",
+        role: "student",
       })
       .returning();
     userId = createdUser.id;
+  }
+
+  const adminUser = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, "admin@veritas.academy"));
+
+  if (adminUser.length === 0) {
+    await db.insert(users).values({
+      name: "Dr. Elena Quinn",
+      email: "admin@veritas.academy",
+      passwordHash: "admin2026",
+      studentId: "ADM-2026-9001",
+      major: "Research Administration",
+      university: "Veritas Faculty Lab",
+      avatarColor: "#7C3AED",
+      role: "admin",
+    });
   }
 
   // 2. Define 3 Academic Course Corpora

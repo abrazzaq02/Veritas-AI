@@ -22,6 +22,7 @@ import {
   X,
   ArrowUpRight,
   FolderPlus,
+  UserCheck,
 } from "lucide-react";
 import type {
   StudentUser,
@@ -97,8 +98,10 @@ export default function RagStudyWorkspacePage() {
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showWelcomePane, setShowWelcomePane] = useState(true);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const optimisticMessageId = useRef(0);
+  const isAdminAccess = user?.role === "admin";
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -854,7 +857,7 @@ export default function RagStudyWorkspacePage() {
         {/* CENTER WORKSPACE PANE */}
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#FAF8F5]">
           {/* Top Context Header & Pipeline Status Bar */}
-          <header className="h-14 shrink-0 px-4 lg:px-6 bg-[#FAF8F5] border-b border-[#E5E0D8] flex items-center justify-between gap-3">
+          <header className="h-14 shrink-0 px-4 lg:px-6 bg-[#FAF8F5]/85 border-b border-[#E5E0D8] flex items-center justify-between gap-3 backdrop-blur-sm">
             <div className="flex items-center gap-3 min-w-0">
               <button
                 type="button"
@@ -950,38 +953,81 @@ export default function RagStudyWorkspacePage() {
           {/* CENTER CONTENT BY ACTIVE TAB */}
           {activeTab === "qa" && activeCorpus && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Scrollable Q&A Synthesis Stream */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-                <div className="max-w-3xl mx-auto space-y-6">
-                  {/* Course Context Intro Card */}
-                  <div className="bg-[#F3EFEA] border border-[#E5E0D8] rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
-                    <div className="space-y-0.5">
-                      <div className="text-[11px] font-mono text-[#1E3A8A] font-semibold uppercase flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5" />
-                        <span>
-                          Citation-Grounded RAG Pipeline • {activeCorpus.code}
-                        </span>
+              <div className="p-4 sm:p-6 pb-0">
+                <div className="max-w-3xl mx-auto glass-panel rounded-2xl p-4 sm:p-5 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(30,58,138,0.12),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(217,119,6,0.12),_transparent_25%)]" />
+                  <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="space-y-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1E3A8A]/20 bg-[#1E3A8A]/5 px-2.5 py-1 text-[10px] font-mono font-semibold uppercase tracking-[0.12em] text-[#1E3A8A]">
+                        <Sparkles className="w-3 h-3" />
+                        {isAdminAccess ? "faculty oversight mode" : "Smart academic workspace"}
+                      </span>
+                      <div>
+                        <h2 className="font-serif text-[26px] leading-tight text-[#18181B]">
+                          {user?.name ? `Welcome back, ${user.name}` : "Study with confidence"}
+                        </h2>
+                        <p className="mt-1 text-[13px] text-[#52525B] max-w-xl">
+                          {isAdminAccess
+                            ? "Faculty and admin access is enabled. Review corpus health, manage access, and monitor research workflows from a single workspace."
+                            : "Sign in to save your study threads, keep your research context, and continue working with source-grounded answers across your archive."}
+                        </p>
                       </div>
-                      <p className="text-[13px] text-[#52525B]">
-                        Every answer embeds your question into 64D vector space, retrieves Top-K course passages, and links inline{" "}
-                        <span className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] font-semibold">
-                          [1]
-                        </span>{" "}
-                        citations to the Source Inspector.
-                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingDoc(null);
-                        setDocModalOpen(true);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5CFC4] text-[12px] font-medium text-[#18181B] hover:bg-[#FAF8F5] cursor-pointer shrink-0"
-                    >
-                      <Plus className="w-3.5 h-3.5 text-[#1E3A8A]" />
-                      <span>Add Reading to Corpus</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setAuthModalOpen(true)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-3.5 py-2 text-[12px] font-medium text-white shadow-sm transition hover:bg-[#152d66]"
+                      >
+                        <UserCheck className="w-3.5 h-3.5" />
+                        {user ? "Profile & login" : "Login / sign in"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowWelcomePane(false)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#E5E0D8] bg-white px-3.5 py-2 text-[12px] font-medium text-[#18181B] transition hover:bg-[#F3EFEA]"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        Dismiss
+                      </button>
+                    </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Scrollable Q&A Synthesis Stream */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4 space-y-6">
+                <div className="max-w-3xl mx-auto space-y-6">
+                  {showWelcomePane && (
+                    <div className="soft-card rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <div className="text-[11px] font-mono text-[#1E3A8A] font-semibold uppercase flex items-center gap-1.5">
+                          <Layers className="w-3.5 h-3.5" />
+                          <span>
+                            Citation-Grounded RAG Pipeline • {activeCorpus.code}
+                          </span>
+                        </div>
+                        <p className="text-[13px] text-[#52525B]">
+                          Every answer embeds your question into 64D vector space, retrieves Top-K course passages, and links inline{" "}
+                          <span className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-[#FEF3C7] text-[#92400E] font-semibold">
+                            [1]
+                          </span>{" "}
+                          citations to the Source Inspector.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingDoc(null);
+                          setDocModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D5CFC4] text-[12px] font-medium text-[#18181B] hover:bg-[#FAF8F5] cursor-pointer shrink-0"
+                      >
+                        <Plus className="w-3.5 h-3.5 text-[#1E3A8A]" />
+                        <span>Add Reading to Corpus</span>
+                      </button>
+                    </div>
+                  )}
 
                   {/* Messages Thread */}
                   {!activeSession || activeSession.messages.length === 0 ? (

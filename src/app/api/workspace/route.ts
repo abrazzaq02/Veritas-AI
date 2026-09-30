@@ -121,6 +121,7 @@ export async function GET(req: NextRequest) {
             major: currentUser.major,
             university: currentUser.university,
             avatarColor: currentUser.avatarColor,
+            role: (currentUser.role as "student" | "faculty" | "admin") || "student",
           }
         : null,
       corpora: corporaWithMetrics,

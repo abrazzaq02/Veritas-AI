@@ -12,9 +12,20 @@
     --border-stone: #E5E0D8;
   }
 
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
-    background-color: #FAF8F5;
+    background:
+      radial-gradient(circle at top left, rgba(30, 58, 138, 0.08), transparent 30%),
+      radial-gradient(circle at top right, rgba(217, 119, 6, 0.08), transparent 22%),
+      linear-gradient(180deg, #f4f1eb 0%, #faf8f5 40%, #f5f3ef 100%);
     color: #18181B;
   }
 
@@ -24,6 +35,21 @@
 
   code, pre, .font-mono-tech {
     font-family: var(--font-mono), monospace;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(229, 224, 216, 0.9);
+    box-shadow: 0 20px 45px rgba(24, 24, 27, 0.06);
+    backdrop-filter: blur(10px);
+  }
+
+  .soft-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(243,239,234,0.9));
+    border: 1px solid rgba(229, 224, 216, 0.9);
+    box-shadow: 0 12px 30px rgba(24, 24, 27, 0.04);
   }
 }
 

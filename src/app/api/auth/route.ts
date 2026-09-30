@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
             major: activeUser.major,
             university: activeUser.university,
             avatarColor: activeUser.avatarColor,
+            role: (activeUser.role as "student" | "faculty" | "admin") || "student",
           }
         : null,
       availableAccounts: allUsers.map((u) => ({
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest) {
         major: u.major,
         university: u.university,
         avatarColor: u.avatarColor,
+        role: (u.role as "student" | "faculty" | "admin") || "student",
       })),
     });
   } catch (error) {
@@ -50,7 +52,16 @@ export async function POST(req: NextRequest) {
   try {
     await ensureSeeded();
     const body = await req.json();
-    const { action, email, password, name, major, university } = body;
+    const {
+      action,
+      email,
+      password,
+      name,
+      major,
+      university,
+      role,
+      newPassword,
+    } = body;
 
     if (action === "register") {
       if (!email || !name) {
@@ -60,10 +71,11 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      const cleanEmail = email.trim().toLowerCase();
       const existing = await db
         .select()
         .from(users)
-        .where(eq(users.email, email.trim().toLowerCase()));
+        .where(eq(users.email, cleanEmail));
 
       if (existing.length > 0) {
         return NextResponse.json(
@@ -72,17 +84,26 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      const allowedRoles = ["student", "faculty", "admin"] as const;
+      const safeRole = allowedRoles.includes(role) ? role : "student";
       const randomId = Math.floor(1000 + Math.random() * 9000);
       const [newUser] = await db
         .insert(users)
         .values({
           name: name.trim(),
-          email: email.trim().toLowerCase(),
+          email: cleanEmail,
           passwordHash: password || "scholar2026",
-          studentId: `STU-2026-${randomId}`,
+          studentId:
+            safeRole === "faculty"
+              ? `FAC-2026-${randomId}`
+              : safeRole === "admin"
+                ? `ADM-2026-${randomId}`
+                : `STU-2026-${randomId}`,
           major: major?.trim() || "Interdisciplinary Research",
-          university: university?.trim() || "Columbia Archival Research Institute",
-          avatarColor: "#059669",
+          university:
+            university?.trim() || "Columbia Archival Research Institute",
+          avatarColor: safeRole === "admin" ? "#7C3AED" : "#059669",
+          role: safeRole,
         })
         .returning();
 
@@ -95,6 +116,50 @@ export async function POST(req: NextRequest) {
           major: newUser.major,
           university: newUser.university,
           avatarColor: newUser.avatarColor,
+          role: (newUser.role as "student" | "faculty" | "admin") || "student",
+        },
+      });
+    }
+
+    if (action === "reset") {
+      const cleanEmail = (email || "").trim().toLowerCase();
+      const nextPassword = (newPassword || password || "").trim();
+
+      if (!cleanEmail || !nextPassword) {
+        return NextResponse.json(
+          { error: "Email and a new password are required." },
+          { status: 400 }
+        );
+      }
+
+      const found = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, cleanEmail));
+
+      if (found.length === 0) {
+        return NextResponse.json(
+          { error: "No scholar account found for that email address." },
+          { status: 404 }
+        );
+      }
+
+      const [updated] = await db
+        .update(users)
+        .set({ passwordHash: nextPassword })
+        .where(eq(users.email, cleanEmail))
+        .returning();
+
+      return NextResponse.json({
+        user: {
+          id: updated.id,
+          name: updated.name,
+          email: updated.email,
+          studentId: updated.studentId,
+          major: updated.major,
+          university: updated.university,
+          avatarColor: updated.avatarColor,
+          role: (updated.role as "student" | "faculty" | "admin") || "student",
         },
       });
     }
@@ -129,6 +194,7 @@ export async function POST(req: NextRequest) {
         major: user.major,
         university: user.university,
         avatarColor: user.avatarColor,
+        role: (user.role as "student" | "faculty" | "admin") || "student",
       },
     });
   } catch (error) {

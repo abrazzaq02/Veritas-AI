@@ -771,19 +771,23 @@ export function AuthModal({
   currentUser,
   onAuthSuccess,
 }: AuthModalProps) {
-  const [tab, setTab] = useState<"profile" | "login" | "register">(
+  const [tab, setTab] = useState<"profile" | "login" | "register" | "reset">(
     currentUser ? "profile" : "login"
   );
   const [email, setEmail] = useState(
     currentUser?.email || "clara.vance@columbia.edu"
   );
   const [password, setPassword] = useState("scholar2026");
+  const [newPassword, setNewPassword] = useState("");
   const [name, setName] = useState(currentUser?.name || "");
   const [major, setMajor] = useState(
     currentUser?.major || "Computational Neurobiology & CS"
   );
   const [university, setUniversity] = useState(
     currentUser?.university || "Columbia Archival Research Institute"
+  );
+  const [role, setRole] = useState<"student" | "faculty" | "admin">(
+    currentUser?.role || "student"
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -795,16 +799,19 @@ export function AuthModal({
     setError("");
     setLoading(true);
     try {
+      const action = tab === "register" ? "register" : tab === "reset" ? "reset" : "login";
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: tab === "register" ? "register" : "login",
+          action,
           email,
           password,
           name,
           major,
           university,
+          role,
+          newPassword,
         }),
       });
       const data = await res.json();
@@ -814,7 +821,7 @@ export function AuthModal({
       }
       if (data.user) {
         onAuthSuccess(data.user);
-        onClose();
+        if (tab !== "reset") onClose();
       }
     } catch {
       setError("Network error while authenticating");
@@ -885,7 +892,7 @@ export function AuthModal({
                   : "border-transparent text-[#52525B]"
               }`}
             >
-              Active Scholar Profile
+              Profile
             </button>
           )}
           <button
@@ -908,7 +915,7 @@ export function AuthModal({
                 : "border-transparent text-[#52525B]"
             }`}
           >
-            New Student Account
+            Register
           </button>
         </div>
 
@@ -925,6 +932,28 @@ export function AuthModal({
                 <div className="text-[11px] font-mono text-[#52525B]">
                   {currentUser.studentId} • {currentUser.email}
                 </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-[#E5E0D8] bg-[#FAF8F5] p-2.5">
+              <div className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#52525B] mb-2">
+                Account access level
+              </div>
+              <div className="flex gap-2">
+                {(["student", "faculty", "admin"] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setRole(level)}
+                    className={`flex-1 rounded-lg border px-2 py-1.5 text-[11px] font-medium capitalize transition ${
+                      role === level
+                        ? "border-[#1E3A8A] bg-[#1E3A8A] text-white"
+                        : "border-[#E5E0D8] bg-white text-[#18181B]"
+                    }`}
+                  >
+                    {level}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1006,6 +1035,30 @@ export function AuthModal({
               </div>
             )}
 
+            {tab === "register" && (
+              <div className="rounded-lg border border-[#E5E0D8] bg-[#FAF8F5] p-2.5">
+                <div className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#52525B] mb-2">
+                  Access level
+                </div>
+                <div className="flex gap-2">
+                  {(["student", "faculty", "admin"] as const).map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => setRole(level)}
+                      className={`flex-1 rounded-lg border px-2 py-1.5 text-[11px] font-medium capitalize transition ${
+                        role === level
+                          ? "border-[#1E3A8A] bg-[#1E3A8A] text-white"
+                          : "border-[#E5E0D8] bg-white text-[#18181B]"
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-[12px] font-medium text-[#18181B] mb-1">
                 University Email
@@ -1020,18 +1073,36 @@ export function AuthModal({
               />
             </div>
 
-            <div>
-              <label className="block text-[12px] font-medium text-[#18181B] mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-10 px-3 rounded-lg bg-white border border-[#D4D4D8] text-[13px]"
-              />
-            </div>
+            {tab !== "reset" && (
+              <div>
+                <label className="block text-[12px] font-medium text-[#18181B] mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-10 px-3 rounded-lg bg-white border border-[#D4D4D8] text-[13px]"
+                />
+              </div>
+            )}
+
+            {tab === "reset" && (
+              <div>
+                <label className="block text-[12px] font-medium text-[#18181B] mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Choose a new password"
+                  className="w-full h-10 px-3 rounded-lg bg-white border border-[#D4D4D8] text-[13px]"
+                />
+              </div>
+            )}
 
             {tab === "register" && (
               <div>
@@ -1048,17 +1119,26 @@ export function AuthModal({
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail("clara.vance@columbia.edu");
-                  setPassword("scholar2026");
-                }}
-                className="text-[11px] font-mono text-[#1E3A8A] underline cursor-pointer"
-              >
-                Fill Demo Credentials
-              </button>
+            <div className="flex items-center justify-between gap-2 pt-2">
+              <div className="flex flex-col items-start gap-1 text-left">
+                <button
+                  type="button"
+                  onClick={() => setTab(tab === "reset" ? "login" : "reset")}
+                  className="text-[11px] font-mono text-[#1E3A8A] underline cursor-pointer"
+                >
+                  {tab === "reset" ? "Back to sign in" : "Reset password"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("clara.vance@columbia.edu");
+                    setPassword("scholar2026");
+                  }}
+                  className="text-[11px] font-mono text-[#1E3A8A] underline cursor-pointer"
+                >
+                  Fill Demo Credentials
+                </button>
+              </div>
               <button
                 type="submit"
                 disabled={loading}
@@ -1069,7 +1149,9 @@ export function AuthModal({
                   {loading
                     ? "Authenticating..."
                     : tab === "register"
-                    ? "Create Scholar Account"
+                    ? "Create Account"
+                    : tab === "reset"
+                    ? "Update Password"
                     : "Sign In"}
                 </span>
               </button>

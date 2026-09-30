@@ -45,6 +45,7 @@ export const users = pgTable("users", {
   major: text("major").notNull(),
   university: text("university").notNull(),
   avatarColor: text("avatar_color").notNull().default("#1E3A8A"),
+  role: text("role").notNull().default("student"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

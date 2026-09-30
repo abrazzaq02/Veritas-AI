@@ -10,6 +10,7 @@ export interface StudentUser {
   major: string;
   university: string;
   avatarColor: string;
+  role: "student" | "faculty" | "admin";
 }
 
 export interface CorpusSummary {

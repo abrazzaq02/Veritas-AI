@@ -232,8 +232,8 @@ Make sure you have the following installed:
 
 - **Node.js**
 - **npm**
-- **PostgreSQL**
-- A configured database connection
+
+PostgreSQL is optional for local development. Without `DATABASE_URL`, the app uses a persistent embedded database in `.local-data/`.
 
 ---
 
@@ -261,7 +261,7 @@ npm install
 
 ### 3. Configure Environment Variables
 
-Create a `.env` file in the project root.
+To use PostgreSQL, create a `.env` file in the project root and configure `DATABASE_URL`.
 
 ```env
 DATABASE_URL="postgresql://username:password@localhost:5432/veritas_ai"
@@ -273,9 +273,11 @@ DATABASE_URL="postgresql://username:password@localhost:5432/veritas_ai"
 
 ### 4. Configure the Database
 
-Make sure your PostgreSQL database is running and your `DATABASE_URL` is correctly configured.
+When using the embedded database, migrations are applied automatically at startup. For PostgreSQL, make sure the database is running and apply the Drizzle migrations before starting the app:
 
-Then run the required database migration/schema commands according to your Drizzle configuration.
+```bash
+npx drizzle-kit migrate --config=drizzle.config.json
+```
 
 ---
 
