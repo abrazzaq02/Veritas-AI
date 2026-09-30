@@ -68,6 +68,8 @@ Users can inspect:
 
 This makes the generated answers easier to verify against the original study material.
 
+When configured, Amazon Bedrock generates answers from the retrieved excerpts. The local retrieval pipeline and deterministic answer fallback remain available for development without AWS credentials.
+
 ### 🎯 Configurable Retrieval
 The retrieval pipeline provides controls for:
 
@@ -178,6 +180,7 @@ Manage course corpora, documents, study notes, and learning resources.
 | **TypeScript** | Type-safe development |
 | **PostgreSQL** | Persistent database |
 | **Drizzle ORM** | Database ORM and schema management |
+| **Amazon Bedrock** | Optional citation-grounded answer generation |
 | **Tailwind CSS 4** | UI styling |
 | **Lucide React** | Interface icons |
 | **ESLint** | Code quality |
@@ -268,6 +271,15 @@ DATABASE_URL="postgresql://username:password@localhost:5432/veritas_ai"
 ```
 
 > Add any additional environment variables required by your local configuration.
+
+To use Amazon Bedrock for answer generation, configure a model available in your AWS region:
+
+```env
+AWS_REGION="us-east-1"
+BEDROCK_MODEL_ID="anthropic.claude-3-5-haiku-20241022-v1:0"
+```
+
+The server uses the standard AWS credential provider chain. Locally, use an AWS profile; on AWS, assign the service an IAM role that permits `bedrock:InvokeModel` for the selected model. Do not store AWS access keys in client-side code.
 
 ---
 
