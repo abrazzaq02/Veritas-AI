@@ -1,11 +1,12 @@
 import { PGlite } from "@electric-sql/pglite";
 import { sql } from "drizzle-orm";
 import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
-import { migrate } from "drizzle-orm/pglite/migrator";
+import { migrate as migratePglite } from "drizzle-orm/pglite/migrator";
 import {
   drizzle as drizzlePostgres,
   type NodePgDatabase,
 } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Pool } from "pg";
@@ -44,6 +45,11 @@ async function createDatabase(): Promise<NodePgDatabase> {
     }
 
     const database = drizzlePostgres(pool);
+
+    await migrate(database, {
+      migrationsFolder: resolve(process.cwd(), "drizzle"),
+    });
+
     await ensureUserRoleColumnForDb(database);
 
     return database;
@@ -59,7 +65,7 @@ async function createDatabase(): Promise<NodePgDatabase> {
   await client.waitReady;
 
   const embeddedDb = drizzlePglite(client);
-  await migrate(embeddedDb, {
+  await migratePglite(embeddedDb, {
     migrationsFolder: resolve(process.cwd(), "drizzle"),
   });
 
