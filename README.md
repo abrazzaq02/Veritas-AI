@@ -217,7 +217,8 @@ Veritas-AI/
 │   └── types/
 │       └── rag.ts
 │
-├── drizzle.config.json
+├── drizzle.config.ts
+├── netlify/database/migrations/
 ├── next.config.ts
 ├── package.json
 ├── postcss.config.mjs
@@ -236,7 +237,7 @@ Make sure you have the following installed:
 - **Node.js**
 - **npm**
 
-PostgreSQL is optional for local development. Without `DATABASE_URL`, the app uses a persistent embedded database in `.local-data/`.
+Data is stored in Netlify Database (managed Postgres). Run the app locally with `netlify dev` so the database connection is provided automatically.
 
 ---
 
@@ -264,13 +265,7 @@ npm install
 
 ### 3. Configure Environment Variables
 
-To use PostgreSQL, create a `.env` file in the project root and configure `DATABASE_URL`.
-
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/veritas_ai"
-```
-
-> Add any additional environment variables required by your local configuration.
+No database connection string is needed — Netlify Database configures the connection automatically.
 
 To use Amazon Bedrock for answer generation, configure a model available in your AWS region:
 
@@ -285,18 +280,20 @@ The server uses the standard AWS credential provider chain. Locally, use an AWS 
 
 ### 4. Configure the Database
 
-When using the embedded database, migrations are applied automatically at startup. For PostgreSQL, make sure the database is running and apply the Drizzle migrations before starting the app:
+The schema lives in `src/db/schema.ts`. After changing it, generate a migration:
 
 ```bash
-npx drizzle-kit migrate --config=drizzle.config.json
+npx drizzle-kit generate --name <descriptive_name>
 ```
+
+Migrations in `netlify/database/migrations/` are applied automatically by Netlify on every deploy. To apply them to your local development database, run `netlify db migrations apply`.
 
 ---
 
 ### 5. Start the Development Server
 
 ```bash
-npm run dev
+netlify dev
 ```
 
 Open:
